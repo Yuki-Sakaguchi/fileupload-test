@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="ja">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <meta http-equiv="X-UA-Compatible" content="ie=edge">
+        <title>file drop upload 1</title>
+        <style>
+        .form {
+            user-select: none;
+        }
+        .drop-area {
+            margin: 50px auto;
+            width: 300px;
+            height: 150px;
+            background-color: #efefef;
+            border: 3px dashed #ccc;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .drop-area__text {
+            font-size: 10px;
+            color: #999;
+        }
+        .file-input {
+            display: none;
+        }
+        .preview {
+            padding: 20px;
+            text-align: center;
+        }
+        .preview__item {
+            width: 100px;
+            margin: 20px;
+            height: 100px;
+            background-color: rgba(0,0,0,0.1);
+            background-repeat: no-repeat;
+            background-size: contain;
+            box-shadow: 0 0 1px 1px rgba(0,0,0,0.1);
+            background-position: center;
+            display: inline-block;
+        }
+        .submit {
+            display: block;
+            margin: auto;
+        }
+        </style>
+    </head>
+    <body>
+        <h1>ファイルアップロード</h1>
+        <form action="" id="form" class="form" method="post" enctype="multipart/form-data">
+            <div id="drop-area" class="drop-area">
+                <span class="drop-area__text">ここにファイルを<br>ドロップしてください</span>
+                <input id="file-input" class="file-input" type="file" name="image">
+            </div>
+            <h2>プレビュー</h2>
+            <div id="preview" class="preview"></div>
+            <input id="submit" class="submit" type="submit" value="送信">
+        </form>
+        
+        <script>
+            window.addEventListener('DOMContentLoaded', () => {
+                let elForm = document.getElementById('form');
+                let elDrop = document.getElementById('drop-area');
+                let elFile = document.getElementById('file-input');
+                let elPreview = document.getElementById('preview');
+
+                const dragOver = 'dragover';
+                const dragLeave = 'dragleave';
+                const drop = 'drop';
+
+                // ファイルエリアにファイルを持ってマウスを乗せた時
+                elDrop.addEventListener(dragOver, (e) => {
+                    e.preventDefault();
+                    elDrop.classList.add(dragOver);
+                });
+
+                // ファイルエリアから外れた時
+                elDrop.addEventListener(dragLeave, (e) => {
+                    e.preventDefault();
+                    elDrop.classList.remove(dragOver);
+                });
+
+                // ファイルエリアにファイルを落とした時
+                elDrop.addEventListener(drop, (e) => {
+                    e.preventDefault();
+                    elDrop.classList.remove(drop);
+                    elFile.files = e.dataTransfer.files;
+
+                    if (elFile.files.length < 1) {
+                        // ファイルがない場合終了
+                        return false;
+                    }
+
+                    // プレビューを初期化
+                    elPreview.textContent = null;
+
+                    // ファイルのプレビューを表示
+                    for (let i = 0, len = elFile.files.length; i < len; i++) {
+                        var file = elFile.files[i];
+
+                        if (file.type.indexOf('image') < 0) {
+                            // 画像ファイル以外は終了
+                            continue;
+                        }
+
+                        var reader = new FileReader();
+                        reader.onload = ((file) => {
+                            return function(e) {
+                                var eldiv = document.createElement('div');
+                                eldiv.style.backgroundImage = 'url(' + e.target.result + ')';
+                                eldiv.classList.add('preview__item');
+                                elPreview.appendChild(eldiv);
+                            }
+                        })(file);
+                        reader.readAsDataURL(file);
+                    }
+                });
+            });
+        </script>
+    </body>
+</html>
